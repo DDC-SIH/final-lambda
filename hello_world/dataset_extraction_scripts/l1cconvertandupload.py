@@ -147,7 +147,10 @@ class L1CProcessor:
                     'COMPRESS=LZW',
                     'TILED=YES',
                     'COPY_SRC_OVERVIEWS=YES',
-                    'BIGTIFF=YES'
+                    'BIGTIFF=YES',
+                    'RESAMPLING=NEAREST',
+                    'BLOCKXSIZE=512',
+                    'BLOCKYSIZE=512'
                 ]
             )
             gdal.Translate(output_tif, input_tif, options=cog_options)
@@ -157,11 +160,30 @@ class L1CProcessor:
             print(f"ERROR in COG conversion: {str(e)}")
             return False
 
+    def reproject_to_epsg3857(self, input_tif: str, output_tif: str) -> None:
+        """Reproject a GeoTIFF to EPSG:3857"""
+        warp_options = gdal.WarpOptions(
+            dstSRS='EPSG:3857',
+            format='GTiff',
+            creationOptions=[
+                'COMPRESS=LZW',
+                'TILED=YES',
+                'COPY_SRC_OVERVIEWS=YES',
+                'BIGTIFF=YES',
+                'RESAMPLING=NEAREST',
+                'BLOCKXSIZE=512',
+                'BLOCKYSIZE=512'
+            ]
+        )
+        gdal.Warp(output_tif, input_tif, options=warp_options)
+        os.remove(input_tif)  # Remove original TIFF after reprojection
+
     def process_single_band(self, key: str, data: np.ndarray, h5f, scale_factor: float, add_offset: float) -> Optional[str]:
         """Process a single band and upload it to S3"""
         print(f"\n=== Processing Band: {key} ===")
         
         temp_tif = f"/tmp/{key}_temp.tif"
+        temp_reprojected_tif = f"/tmp/{key}_reprojected_temp.tif"
         final_cog = f"/tmp/{key}_cog.tif"
         s3_key = f"{self.filename}/{key}_cog.tif"
 
@@ -206,8 +228,11 @@ class L1CProcessor:
                     'DATETIME': datetime.now().strftime("%Y:%m:%d %H:%M:%S")
                 })
             
+            # Reproject to EPSG:3857
+            self.reproject_to_epsg3857(temp_tif, temp_reprojected_tif)
+
             # Convert to COG and upload
-            if not self.convert_to_cog(temp_tif, final_cog):
+            if not self.convert_to_cog(temp_reprojected_tif, final_cog):
                 raise Exception(f"Failed to convert {key} to COG format")
 
             # Upload to S3
@@ -228,7 +253,7 @@ class L1CProcessor:
             return None
         finally:
             # Cleanup
-            for file in [temp_tif, final_cog]:
+            for file in [temp_tif, temp_reprojected_tif, final_cog]:
                 if os.path.exists(file):
                     os.remove(file)
 

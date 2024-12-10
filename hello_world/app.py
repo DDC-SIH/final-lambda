@@ -17,6 +17,7 @@ from dataset_extraction_scripts.l1cconvertandupload import (
     L1CProcessor,
     extract_and_project_subdatasets
 )
+from utils.l1c_metadata_handler import L1CMetadataHandler
 
 # Configure logging with more detail
 logger = logging.getLogger()
@@ -72,12 +73,15 @@ def get_metadata_handler(data_type: str):
     print(f"Getting metadata handler for data type: {data_type}")
     region = os.environ.get('AWS_DEFAULT_REGION', 'ap-south-1')
     handlers = {
-        'L1B': None,  # L1BMetadataHandler(region=region),
-        'L1C': None,  # L1CMetadataHandler(region=region),
-        'L2B': None,  # L2BMetadataHandler(region=region),
-        'L2C': None   # L2CMetadataHandler(region=region)
+        'L1B': None,  # Replace with actual L1BMetadataHandler if available
+        'L1C': L1CMetadataHandler(region=region),
+        'L2B': None,  # Replace with actual L2BMetadataHandler if available
+        'L2C': None   # Replace with actual L2CMetadataHandler if available
     }
-    return handlers.get(data_type)
+    print(f"Handlers dictionary: {handlers}")
+    handler = handlers.get(data_type)
+    print(f"Selected handler: {handler}")
+    return handler
 
 def process_bands(data_type: str, h5_file_path: str, output_dir: str):
     """Process bands based on data type"""
@@ -130,6 +134,22 @@ def extract_and_project_subdatasets(h5_file_path: str, output_dir: str):
     )
     return processor.process()
 
+def create_s3_client():
+    """Create S3 client with proper configuration"""
+    config = Config(
+        region_name=os.environ.get('AWS_DEFAULT_REGION', 'ap-south-1'),
+        retries={
+            'max_attempts': 3,
+            'mode': 'standard'
+        }
+    )
+    return boto3.client(
+        's3',
+        config=config,
+        aws_access_key_id='AKIAWEJRDA3QOVOK5EWE',
+        aws_secret_access_key='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'
+    )
+
 def process_satellite_data(filename: str, input_path: str, output_dir: str):
     """Main processing pipeline for satellite data"""
     try:
@@ -154,20 +174,40 @@ def process_satellite_data(filename: str, input_path: str, output_dir: str):
         data_type = determine_data_type(filename)
         print(f"Detected data type: {data_type}")
 
-        # Step 3: Copy file from S3 to local
+        # Step 3: Copy file from S3 to local with better error handling
         print(f"\n=== Step 3: Copying File from S3 ===")
         try:
-            s3_client = boto3.client('s3')
+            s3_client = create_s3_client()
             source_bucket = os.environ.get('SOURCE_BUCKET', 'kdg-raw')
             dest_bucket = os.environ.get('DESTINATION_BUCKET', 'final-cog')
+            
             print(f"Source bucket: {source_bucket}")
             print(f"Source file: {filename}")
             print(f"Destination: {input_path}")
+            
+            # Check if file exists first
+            try:
+                s3_client.head_object(Bucket=source_bucket, Key=filename)
+            except Exception as e:
+                if '403' in str(e):
+                    raise Exception(f"Permission denied accessing {source_bucket}/{filename}. Please check IAM roles.")
+                elif '404' in str(e):
+                    raise Exception(f"File {filename} not found in bucket {source_bucket}")
+                else:
+                    raise
+            
+            # Download file if exists
             s3_client.download_file(source_bucket, filename, input_path)
             print("File downloaded successfully")
+            
         except Exception as e:
-            print(f"Failed to download file: {str(e)}")
-            raise
+            detailed_error = f"Failed to download file: {str(e)}\n"
+            detailed_error += f"Bucket: {source_bucket}\n"
+            detailed_error += f"Key: {filename}\n"
+            detailed_error += f"AWS Region: {os.environ.get('AWS_DEFAULT_REGION', 'ap-south-1')}\n"
+            detailed_error += f"IAM Role: {os.environ.get('AWS_ROLE_ARN', 'Not specified')}"
+            logger.error(detailed_error)
+            raise Exception(detailed_error)
 
         # Step 4: Generate products
         print(f"\n=== Step 4: Generating Products ===")
@@ -188,12 +228,16 @@ def process_satellite_data(filename: str, input_path: str, output_dir: str):
         # Step 5: Handle metadata
         print(f"\n=== Step 5: Processing Metadata ===")
         metadata_handler = get_metadata_handler(data_type)
+        print(f"Metadata handler obtained: {metadata_handler}")
         if metadata_handler:
-            print(f"Using {data_type} metadata handler")
+            print(f"Using {data_type} metadata handler: {metadata_handler}")
             print("Extracting metadata...")
+            print(f"Input path for metadata extraction: {input_path}")
             metadata_result = metadata_handler.extract_metadata(input_path)
+            print(f"Metadata extraction result: {metadata_result}")
             print("Metadata extraction complete")
         else:
+            print(f"No metadata handler available for data type: {data_type}")
             metadata_result = {}
 
         # Step 6: Cleanup

@@ -13,7 +13,7 @@
           "arn": "arn:aws:s3:::kdg-raw"
         },
         "object": {
-          "key": "3RIMG_04SEP2024_1215_L1C_ASIA_MER_V01R00.h5",
+          "key": "3RIMG_04SEP2024_1245_L1C_ASIA_MER_V01R00.h5",
           "size": 435112869,
           "eTag": "d41d8cd98f00b204e9800998ecf8427e"
         }

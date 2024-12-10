@@ -14,12 +14,13 @@ Resources:
       Environment:
         Variables:
           AWS_DEFAULT_REGION: ap-south-1
-          DYNAMODB_TABLE: Files  # Match the actual table name
+          DYNAMODB_TABLE: L1C  # Match the actual table name
           DYNAMODB_ENDPOINT: https://dynamodb.ap-south-1.amazonaws.com
           SOURCE_BUCKET: kdg-raw
           DESTINATION_BUCKET: final-cog
-          AWS_ACCESS_KEY_ID: AKIAWEJRDA3QFF5OHEP6
-          AWS_SECRET_ACCESS_KEY: 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
+          AWS_ACCESS_KEY_ID: AKIAWEJRDA3QOVOK5EWE
+          AWS_SECRET_ACCESS_KEY: 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
+          DYNAMODB_REGION: ap-south-1
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -44,6 +45,12 @@ Resources:
             BucketName: kdg-raw
         - S3CrudPolicy:
             BucketName: final-cog
+        - S3WritePolicy:
+            BucketName: final-cog
+        - DynamoDBCrudPolicy:
+            TableName: satellite-metadata
+        - DynamoDBCrudPolicy:
+            TableName: L1C
       Events:
         S3Trigger:
           Type: S3
@@ -64,14 +71,16 @@ Resources:
   MetadataTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Files
+      TableName: L1C
       AttributeDefinitions:
-        - AttributeName: Unique_Id
+        - AttributeName: date
           AttributeType: S
-        - AttributeName: acquisition_timestamp
+        - AttributeName: timestamp
           AttributeType: S
       KeySchema:
-        - AttributeName: Unique_Id
+        - AttributeName: date
           KeyType: HASH
-        - AttributeName: acquisition_timestamp
+        - AttributeName: timestamp
           KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      Region: ap-south-1

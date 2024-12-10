@@ -1,0 +1,185 @@
+{
+  "metadata_schema": {
+    "id": "string",  // Unique_Id (e.g., "3RIMG_04SEP2024_1015")
+    "acquisition": {
+      "date": "string",  // Acquisition_Date (e.g., "04SEP2024")
+      "time_gmt": "string", // Acquisition_Time_in_GMT (e.g., "1015")
+      "start_time": "string", // Acquisition_Start_Time (e.g., "04-SEP-2024T10:15:35")
+      "end_time": "string",   // Acquisition_End_Time (e.g., "04-SEP-2024T10:42:29")
+      "timestamp": "string"   // ISO 8601 combined date-time
+    },
+    "product_info": {
+      "type": "string",      // Product_Type (e.g., "STANDARD (FULL DISK)")
+      "level": "string",     // Processing_Level (e.g., "L1B")
+      "file_name": "string", // HDF_Product_File_Name
+      "creation_time": "string", // Product_Creation_Time
+      "title": "string"     // title
+    },
+    "satellite_info": {
+      "name": "string",      // Satellite_Name
+      "sensor": {
+        "id": "string",      // Sensor_Id
+        "name": "string"     // Sensor_Name
+      },
+      "altitude": "number"   // Observed_Altitude(km)
+    },
+    "coverage": {
+      "latitude": {
+        "upper": "number",   // upper_latitude
+        "lower": "number"    // lower_latitude
+      },
+      "longitude": {
+        "left": "number",    // left_longitude
+        "right": "number"    // right_longitude
+      }
+    },
+    "bands": {
+      "MIR": {
+        "metadata": {
+          "resolution": "number",    // IMG_MIR_resolution
+          "wavelength": "number",    // IMG_MIR_central_wavelength
+          "bandwidth": "number",      // IMG_MIR_bandwidth
+          "bits_per_pixel": "number",
+          "fill_value": "number",
+          "data_range": {
+            "min": "number",
+            "max": "number"
+          },
+          "dimensions": {
+            "width": "number",  // 2805
+            "height": "number"  // 2816
+          }
+        },
+        "url": "string"  // S3 URL after processing
+      },
+      "SWIR": {
+        "metadata": {
+          "resolution": "number",
+          "wavelength": "number",
+          "bandwidth": "number",
+          "bits_per_pixel": "number",
+          "fill_value": "number",
+          "data_range": {
+            "min": "number",
+            "max": "number"
+          },
+          "dimensions": {
+            "width": "number",  // 11220
+            "height": "number"  // 11264
+          }
+        },
+        "url": "string"
+      },
+      "TIR1": {
+        "metadata": {
+          "resolution": "number",
+          "wavelength": "number",
+          "bandwidth": "number",
+          "bits_per_pixel": "number",
+          "fill_value": "number",
+          "data_range": {
+            "min": "number",
+            "max": "number"
+          },
+          "dimensions": {
+            "width": "number",  // 2805
+            "height": "number"  // 2816
+          }
+        },
+        "url": "string"
+      },
+      "TIR2": {
+        "metadata": {
+          "resolution": "number",
+          "wavelength": "number",
+          "bandwidth": "number",
+          "bits_per_pixel": "number",
+          "fill_value": "number",
+          "data_range": {
+            "min": "number",
+            "max": "number"
+          },
+          "dimensions": {
+            "width": "number",  // 2805
+            "height": "number"  // 2816
+          }
+        },
+        "url": "string"
+      },
+      "VIS": {
+        "metadata": {
+          "resolution": "number",
+          "wavelength": "number",
+          "bandwidth": "number",
+          "bits_per_pixel": "number",
+          "fill_value": "number",
+          "data_range": {
+            "min": "number",
+            "max": "number"
+          },
+          "dimensions": {
+            "width": "number",  // 11220
+            "height": "number"  // 11264
+          }
+        },
+        "url": "string"
+      },
+      "WV": {
+        "metadata": {
+          "resolution": "number",
+          "wavelength": "number",
+          "bandwidth": "number",
+          "bits_per_pixel": "number",
+          "fill_value": "number",
+          "data_range": {
+            "min": "number",
+            "max": "number"
+          },
+          "dimensions": {
+            "width": "number",  // 1402
+            "height": "number"  // 1408
+          }
+        },
+        "url": "string"
+      }
+    },
+    "auxiliary_data": {
+      "sun": {
+        "azimuth": "number",     // Sun_Azimuth(Degrees)
+        "elevation": "number"    // Sun_Elevation(Degrees)
+      },
+      "satellite": {
+        "azimuth": "number",     // Sat_Azimuth(Degrees)
+        "elevation": "number"    // Sat_Elevation(Degrees)
+      }
+    },
+    "source": {
+      "institute": "string",     // institute
+      "ground_station": "string" // Ground_Station
+    },
+    "geospatial": {
+      "latitude": {
+        "url": "string",
+        "dimensions": {
+          "width": "number",
+          "height": "number"
+        },
+        "data_range": {
+          "min": "number",  // -81.041527
+          "max": "number"   // 81.041527
+        }
+      },
+      "longitude": {
+        "url": "string",
+        "dimensions": {
+          "width": "number",
+          "height": "number"
+        },
+        "data_range": {
+          "min": "number",  // -7.1567035
+          "max": "number"   // 155.15671
+        }
+      }
+    }
+  }
+}

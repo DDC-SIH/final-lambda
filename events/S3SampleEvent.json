@@ -1,0 +1,23 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.0",
+      "eventSource": "aws:s3",
+      "awsRegion": "ap-south-1",
+      "eventTime": "2024-12-07T10:22:56.185Z",
+      "eventName": "ObjectCreated:Put",
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "bucket": {
+          "name": "kdg-raw",
+          "arn": "arn:aws:s3:::kdg-raw"
+        },
+        "object": {
+          "key": "3RIMG_04SEP2024_1215_L1C_ASIA_MER_V01R00.h5",
+          "size": 435112869,
+          "eTag": "d41d8cd98f00b204e9800998ecf8427e"
+        }
+      }
+    }
+  ]
+}

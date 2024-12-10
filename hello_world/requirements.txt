@@ -1,0 +1,5 @@
+requests
+boto3
+numpy
+netCDF4
+botocore==1.21.0  # Specify a compatible version
